@@ -1,0 +1,4 @@
+a) whoami
+b) groups
+c) who
+d) cat /etc/group | grep sudo -n
