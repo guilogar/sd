@@ -1,0 +1,16 @@
+2. Gestion de Usuarios.
+    1)
+        a) whoami
+        b) groups
+        c) who
+        d) cat /etc/group | grep sudo -n
+    2)
+        a) sudo useradd −d /home/sd
+           sudo passwd sd
+           sudo mkdir /home/sd
+        
+        b) sudo groupadd grupo_sd
+           sudo usermod -a -G grupo_sd sd
+        
+        c) id sd
+           sudo usermod -d /home/comunes -m

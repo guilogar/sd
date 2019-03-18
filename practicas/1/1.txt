@@ -1,0 +1,17 @@
+1. Comandos.
+    a)
+        - Herramientas: Gparted y fdisk en linux.
+        - Particiones: yo particularmente uso 3 particiones. Son: Una para el sistema operativo, otra para /home para mi datos
+          personales y otra para /etc, donde se guarda los archivos de configuracion global para los programas que uso (Apache 2,
+          Nginx, MySQL, PostgreSQL, Snap, mono-xsp4 y un largo etc).
+    b)
+        - La variable de entorno es $PATH en GNU/Linux. Tengo entendido que en windows tambien se llama path, pero windows
+          al ser un gestor de ventanas y no ser un sistema operativo de verdad, da igual.
+    c)
+        - Se aplica la nueva configuración, y al ser GNU/Linux un sistema operativo robusto y pensado para funcionar bien,
+          no como los gestores de ventanas con infulas, se usa el comando sudo service restart networking.
+    d)
+        - 1º Comando: sudo service mysql restart. Se usa para reiniciar el servicio de MySQL.
+        - 2º Comando: sudo service apache2 restart. Se usa para reiniciar el servicio de Apache 2.
+        - 3º Comando: sudo apt install npm. Se usa para instalar el sistema de gestion de software npm, que se usa
+          para instalar cositas chulas de nodejs, javascript, typescript y demás.

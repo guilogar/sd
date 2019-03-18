@@ -1,0 +1,116 @@
+\documentclass{article}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{enumitem}
+\usepackage{listings}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{Page \thepage\hspace{1pt} de~\pageref{LastPage}}
+
+\title{Practica }
+\author{Guillermo Lopez Garcia}
+\begin{document}
+
+\textbf{Ejercicio 1. Comandos.}
+\begin{enumerate}
+    \item Herramientas y particiones
+        \begin{enumerate}
+            \item Herramientas: Gparted y fdisk en linux.
+            \item Particiones: yo particularmente uso 3 particiones. Son: Una para el sistema operativo, otra
+                  para /home para mi datos
+                  personales y otra para /etc, donde se guarda los archivos de configuracion global
+                  para los programas que uso (Apache 2,
+                  Nginx, MySQL, PostgreSQL, Snap, mono-xsp4 y un largo etc).
+        \end{enumerate}
+    \item Variable de entorno
+        \begin{enumerate}
+            \item La variable de entorno es PATH en GNULinux. Tengo entendido que en windows
+                  tambien se llama path, pero windows
+                  al ser un gestor de ventanas y no ser un sistema operativo de verdad, da igual.
+        \end{enumerate}
+    \item Configuracion de red
+        \begin{enumerate}
+            \item Se aplica la nueva configuración, y al ser GNU/Linux un sistema operativo
+                  robusto y pensado para funcionar bien,
+                  no como los gestores de ventanas con infulas, se usa el comando sudo service restart networking.
+        \end{enumerate}
+    \item Comando con sudo de utilidad
+        \begin{enumerate}
+            \item 1º Comando: sudo service mysql restart. Se usa para reiniciar el servicio de MySQL
+            \item 2º Comando: sudo service apache2 restart. Se usa para reiniciar el servicio de Apache 2.
+            \item 3º Comando: sudo apt install npm. Se usa para instalar el sistema de gestion de software npm, que se usa
+                  para instalar cositas chulas de nodejs, javascript, typescript y demás.
+        \end{enumerate}
+\end{enumerate}
+
+\textbf{Ejercicio 2. Gestion de Usuarios.}
+\begin{enumerate}
+    \item
+        \begin{enumerate}
+            \item whoami
+            \item groups
+            \item who
+            \item cat /etc/group | grep sudo -n
+        \end{enumerate}
+    \item
+        \begin{enumerate}
+            \item sudo useradd -d /home/sd, sudo passwd sd, sudo mkdir /home/sd
+            \item sudo groupadd gruposd, sudo usermod -a -G gruposd sd.
+            \item id sd, sudo usermod -d /home/comunes -m
+        \end{enumerate}
+\end{enumerate}
+
+\textbf{Ejercicio 3. Gestion del SO usando Python.}
+\begin{enumerate}
+    \item
+        \lstset{language=Python, texcl=true}
+        \begin{lstlisting}[frame=single]
+            from os import environ
+            Path = environ[PATH]
+            print(Path)
+        \end{lstlisting}
+    \item
+        \lstset{language=Python, texcl=true}
+        \begin{lstlisting}[frame=single]
+            from shutil import copyfile
+            copyfile(
+                "/etc/network/interfaces",
+                "interfaces_bck"
+            )
+        \end{lstlisting}
+    \item
+        \lstset{language=Python, texcl=true}
+        \begin{lstlisting}[frame=single]
+            from filecmp import cmp
+            if cmp(
+                "etc/network/interfaces",
+                "etc/network/interfaces_bck"
+            ):
+                print("True")
+        \end{lstlisting}
+    \item
+        \lstset{language=Python, texcl=true}
+        \begin{lstlisting}[frame=single]
+            from os import listdir
+            from pprint import pprint
+            dirlist = listdir("/home")
+        \end{lstlisting}
+    \item
+        \lstset{language=Python, texcl=true}
+        \begin{lstlisting}[frame=single]
+            import sys
+            
+            name = str(sys.argv[1])
+            with open("etc/passwd") as archivo:
+                for linea in archivo:
+                    if name in linea:
+                        cadena = linea
+            
+            print(cadena.split("/")[4])
+        \end{lstlisting}
+\end{enumerate}
+\end{document}

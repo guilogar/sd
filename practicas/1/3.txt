@@ -1,0 +1,6 @@
+3. Gestion del SO usando Python-
+    1) ejecutar 1.py
+    2) ejecutar 2.py
+    3) ejecutar 3.py
+    4) ejecutar 4.py
+    5) ejecutar 5.py

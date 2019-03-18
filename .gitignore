@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# For latex files
+*.fls
+*.synctex.gz
+*.aux
+*.fdb_latexmk
+*.log
+*.pdf
