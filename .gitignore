@@ -110,3 +110,4 @@ venv.bak/
 *.fdb_latexmk
 *.log
 *.pdf
+*.zip
