@@ -5,7 +5,12 @@
 
 if(isset($_GET['save_to_db']))
 {
-    $con = pg_connect("host=localhost port=5432 dbname=sd user=usuario password=usuario");
+    $host = "localhost";
+    $port = "5432";
+    $dbname = "sd";
+    $userdb = ""; // "usuario";
+    $passdb = ""; // "usuario";
+    $con = pg_connect("host=$host port=$port dbname=$dbname user=$userdb password=$passdb");
     pg_insert($con, "conexiones", array(
         'email' => $_GET['save_to_db']
     ));
@@ -15,10 +20,10 @@ if(isset($_GET['save_to_db']))
     echo json_encode(
         array(
             'info' => array(
-                'fromEmail' => 'jdkdejava@gmail.com',
-                'email' => 'guillermolopezgarcia96@gmail.com',
-                'claveAplicacion' => 'htxjlkjoemmtakie',
-                'method' => 'db'
+                'fromEmail'        => '', // 'torvalds.es.dios@gmail.com',
+                'email'            => '', // 'hazme.tuyo.torvalds@gmail.com',
+                'claveAplicacion'  => '', // 'me gusta el linux, un poco',
+                'method'           => 'db'
             )
         )
     );

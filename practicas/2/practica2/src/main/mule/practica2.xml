@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<http:request-config name="Request">
+	    <http:request-connection host="localhost" port="8081" streamResponse="true" responseBufferSize="1024"/>
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e6826afe-9bd4-43aa-8c21-d15667785897">
+		<http:request-connection host="localhost" port="80" />
+		<http:default-query-params >
+			<http:query-param key="save_to_db" value="#[vars.email]" />
+		</http:default-query-params>
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="2ba4dfb6-e016-4d37-8cd7-f42283e67358" >
+		<http:request-connection host="localhost" port="80" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration2" doc:name="HTTP Request configuration" doc:id="7bf4d74f-2736-4dca-ba33-1c95150074dc" >
+		<http:request-connection host="localhost" port="80" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration3" doc:name="HTTP Request configuration" doc:id="e7c03e20-4868-4b16-b45d-c5a9a64e67ee" basePath="/universidad/sd/practicas/2/index.php" >
+		<http:request-connection host="localhost" port="80" />
+	</http:request-config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="825a5161-f092-44db-920e-a4b9589d2ccd" >
+		<email:smtps-connection host="smtp.gmail.com" user="#[vars.fromEmail]" password="#[vars.claveAplicacion]" >
+			<tls:context >
+				<tls:trust-store insecure="true" />
+			</tls:context>
+		</email:smtps-connection>
+	</email:smtp-config>
+	<flow name="practica2Flow" doc:id="75884d79-fb2f-4577-876d-85e18c22f930" >
+		<scheduler doc:name="Scheduler" doc:id="fc0d6167-c464-4182-b22c-50dd324d2cf0" >
+			<scheduling-strategy >
+				<fixed-frequency startDelay="5" timeUnit="SECONDS" frequency="5"/>
+			</scheduling-strategy>
+		</scheduler>
+		<http:request method="GET" doc:name="Request" path="/universidad/sd/practicas/2/" doc:id="8b873dc8-bd5e-4de5-b0e4-16b44f229a72" config-ref="HTTP_Request_configuration1"/>
+		<ee:transform doc:name="Transform Message" doc:id="b3c13099-b766-444b-9c8f-962204aff514" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/java
+---
+read(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload.info.email]" doc:name="Set Variable" doc:id="cceba3a5-2876-4821-9a9c-230461f38707" variableName="email"/>
+		<set-variable value="#[payload.info.fromEmail]" doc:name="Set Variable" doc:id="095ac6d8-c66f-461b-adef-90d2225b584f" variableName="fromEmail"/>
+		<set-variable value="#[payload.info.claveAplicacion]" doc:name="Set Variable" doc:id="a1496e30-efa7-4f68-b79e-4c2aa2785cfa" variableName="claveAplicacion"/>
+		<choice doc:name="Choice" doc:id="77196890-7f58-41ca-a7b9-ec12a1f65e26" >
+			<when expression="#[payload.info.method == 'db']">
+				<http:request method="GET" doc:name="Request" doc:id="380c398f-ee87-4ac4-978a-e7a343d2b36a" config-ref="HTTP_Request_configuration" path="/universidad/sd/practicas/2/index.php">
+				</http:request>
+			</when>
+			<otherwise >
+				<email:send doc:name="Send" doc:id="a68da591-deb9-48d9-8fa2-f5aa70d29ca5" config-ref="Email_SMTP" fromAddress="#[vars.fromEmail]" subject="Practica 2 de Sistemas Distribuidos">
+					<email:to-addresses >
+						<email:to-address value="#[vars.email]" />
+					</email:to-addresses>
+					<email:body contentType="text/html" >
+						<email:content ><![CDATA[#["<html>
+	<head>
+	</head>
+	</body>
+		<h4>Pues esta funcionando esto del mule.</h4>
+	</body>
+</html>"]]]></email:content>
+					</email:body>
+				</email:send>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
