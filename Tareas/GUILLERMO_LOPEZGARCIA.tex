@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{float}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{Page \thepage\hspace{1pt} de~\pageref{LastPage}}
+
+\title{Tarea 3}
+\author{Guillermo López García}
+\begin{document}
+
+\textbf{1º Ejercicio.}
+\begin{enumerate}
+    \item \underline{Comunicación Síncrona}:
+        \begin{enumerate}
+            \item 1º Escenario: Modificación de usuarios de una base de datos mediante un programa cliente y un programa servidor.
+            \item 2º Escenario: Autentificación de login en un sistema software.
+        \end{enumerate}
+    \item \underline{Comunicación Asíncrona}:
+        \begin{enumerate}
+            \item 1º Escenario: Consulta de usuarios de una base de datos para mostrar en una tabla.
+            \item 2º Escenario: Cualquier sistema que se comunique mediante el protocolo UDP, como por ejemplo, el Fortnite.
+        \end{enumerate}
+\end{enumerate}
+
+\textbf{2º Ejercicio.}
+\\
+No, ya que, si varios receptores de distinta indole se encuentra escuchando en un mismo
+puerto, puede provocar colision y perdida de información.\\
+Si por el contrario, son varios receptores del mismo servicio, entonces si, ya que aumenta
+la posibilidad de atender el servicio y la no saturación de un receptor y que en consecuencia,
+se cree un Denice of Service (D-DOS).\\
+
+\textbf{3º Ejercicio.}
+\begin{enumerate}
+    \item El cliente sabe como localizar el servicio mediante un IdInvocacion, en el cual se
+          setea automáticamente dirección IP origen y destino, y puerto donde se localiza el
+          servicio.
+    \item En principio, cada puerto tiene asociado un identificador numerico único, asi pues,
+          la eficiencia de acceso es de O (1). Por otra parte, el identificador local es el
+          identificador numerico único descrito anteriormente y se utiliza para localizar el
+          puerto y además, poder crear sockets sobre él para poder escuchar las peticiones
+          recibidas por él.
+\end{enumerate}
+
+\end{document}
