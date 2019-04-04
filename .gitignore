@@ -111,3 +111,6 @@ venv.bak/
 *.log
 *.pdf
 *.zip
+
+# For composer utilities
+practicas/3/vendor/*
