@@ -77,43 +77,52 @@ for($i = 0; $i < $len_repos; $i++)
         $branch_name = $b->name;
         $last_commit = $b->commit->sha;
         $query = "select * from repositorios where full_name = '$full_name' ".
-                 " and branch_name = '$branch_name' and last_commit != '$last_commit'";
+                 " and branch_name = '$branch_name' and last_commit = '$last_commit'";
         
         $res = pg_query($con, $query);
-        $fila = pg_fetch_result($res, 0);
+        $existe_commit = pg_fetch_result($res, 0);
         
-        if($fila)
+        if(!$existe_commit)
         {
-            pg_update($con, "repositorios",
-            array(
-                'last_commit' => $last_commit,
-            ), array(
-                'full_name' => $full_name,
-                'branch_name' => $branch_name,
-            ));
-        } else
-        {
-            pg_insert($con, "repositorios", array(
-                'full_name' => $full_name,
-                'branch_name' => $branch_name,
-                'last_commit' => $last_commit,
-            ));
-        }
-
-        if(isset($SEND_TO_TWITTER) && $SEND_TO_TWITTER)
-        {
-            $commit = $api->decode($api->get("repos/$full_name/commits/$last_commit"));
+            $query = "select * from repositorios where full_name = '$full_name' ".
+                     " and branch_name = '$branch_name' and last_commit != '$last_commit'";
             
-            $info_commit = array(
-                'repo_name' => $full_name,
-                'branch_name' => $branch_name,
-                'commiter' => $commit->committer,
-                'date' => $commit->commit->committer->date,
-                'html_url' => $commit->html_url,
-                'files' => $commit->files
-            );
-            $msg = new AMQPMessage(json_encode($info_commit));
-            $channel->basic_publish($msg, '', 'github');
+            $res = pg_query($con, $query);
+            $fila = pg_fetch_result($res, 0);
+            
+            if($fila)
+            {
+                pg_update($con, "repositorios",
+                array(
+                    'last_commit' => $last_commit,
+                ), array(
+                    'full_name' => $full_name,
+                    'branch_name' => $branch_name,
+                ));
+            } else
+            {
+                pg_insert($con, "repositorios", array(
+                    'full_name' => $full_name,
+                    'branch_name' => $branch_name,
+                    'last_commit' => $last_commit,
+                ));
+            }
+
+            if(isset($SEND_TO_TWITTER) && $SEND_TO_TWITTER)
+            {
+                $commit = $api->decode($api->get("repos/$full_name/commits/$last_commit"));
+                
+                $info_commit = array(
+                    'repo_name' => $full_name,
+                    'branch_name' => $branch_name,
+                    'commiter' => $commit->committer,
+                    'date' => $commit->commit->committer->date,
+                    'html_url' => $commit->html_url,
+                    'files' => $commit->files
+                );
+                $msg = new AMQPMessage(json_encode($info_commit));
+                $channel->basic_publish($msg, '', 'github');
+            }
         }
     }
 }
