@@ -7,6 +7,7 @@
 \usepackage{lastpage}
 \usepackage{enumitem}
 \usepackage{listings}
+\usepackage{verbatim}
 \usepackage{float}
 
 \pagestyle{fancy}
@@ -19,11 +20,229 @@ Guillermo López García
 \and
 Guillermo Girón García
 \and
-Teodoro Martínez
+Teodoro Martínez \ldots
 }
 
 \begin{document}
 \maketitle
+\textbf{1º Parte. Descripción de la actividad a realizar.}\\
+Nuestro sistema se basa en informar de toda actividad de un usuario
+en concreto de github a la plataforma de red social Twitter, y si es
+posible, hacer una copia de seguridad de los ficheros afectados
+del repositorio donde el usuario ha hecho los cambios que ha considerado
+oportunos, en google drive, en dropbox o en cualquier otro sistemas
+de ficheros optimo.
 
+\textbf{2º Parte. Descripción de las partes a realizar.}\\
+La actividad se ha descompuesto en 3 partes bien diferenciadas.
+A continuación, las enumeramos.
+\begin{enumerate}
+    \item \underline{1º Parte (Guillermo López García)}: Esta parte se
+        basa en la obtención de la información del usuario de GitHub mediante
+        las claves de aplicación OAuth creada previamente en GitHub.
+        Claro esta, este usuario debe proporcionar estas claves.
+        A su vez, este programa se ejecuta cada cierto tiempo, haciendo spooling,
+        y enviando a una cola del sistema rabbbitmq la información que haya cambiado.
+        También, es necesario aclarar que el programa compara siempre la información,
+        con otra almacenada previamente en una base de datos PostgreSQL\. Si la
+        información cambia, el programa la refresca en la base de datos y, como se
+        ha dicho antes, la introduce en forma de JSON en una cola del sistema
+        rabbitmq.
+    \item \underline{2º Parte (Guillermo Girón García)}:\ldots\ldots\ldots\ldots\ldots
+    \item \underline{3º Parte (Teodoro Martínez \ldots)}:\ldots\ldots\ldots\ldots\ldots
+\end{enumerate}
+
+\textbf{3º Parte. Descripción de las teconologías usadas.}\\
+Las tecnologías usadas son las siguientes:
+\begin{enumerate}
+    \item \underline{1º Parte (Guillermo López García)}: En esta parte, se ha usado
+        la base de datos relacional PostgreSQL, el lenguaje interpretado de servidor
+        PHP, la librería Milo/GitHub para obtener los datos del usuario de GitHub
+        (es posible su instalación mediante composer) y la librería PhpAmqpLib para
+        poder realizar acciones sobre las colas del sistema rabbitmq (es posible su
+        instalación mediante composer).
+    \item \underline{2º Parte (Guillermo Girón García)}:\ldots\ldots\ldots\ldots\ldots
+    \item \underline{3º Parte (Teodoro Martínez \ldots)}:\ldots\ldots\ldots\ldots\ldots
+\end{enumerate}
+
+\textbf{4º Parte. Código usado para realizar el programa.}
+\begin{enumerate}
+    \item \underline{1º Parte (Guillermo López García)}:
+        \begin{enumerate}
+            \item \underline{Base de Datos PostgreSQL}:
+                \lstset{
+                  language=SQL,
+                  texcl=true,
+                  basicstyle=\ttfamily,
+                  columns=fullflexible,
+                  frame=single,
+                  breaklines=true,
+                  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+                }
+                \begin{lstlisting}[frame=single]
+-- La base de datos es PostgreSQL
+-- Para instalar en linux: sudo apt install postgresql
+-- Para instalar en windows: ni idea
+-- Para instalar en mac os: ni idea
+
+drop table if exists repositorios;
+create table repositorios(
+    id bigserial primary key,
+    full_name varchar(5000),
+    branch_name varchar(5000),
+    last_commit varchar(1000)
+);
+                \end{lstlisting}
+            \item \underline{Código de Servidor PHP}:
+                \lstset{
+                  language=PHP,
+                  texcl=true,
+                  basicstyle=\ttfamily,
+                  columns=fullflexible,
+                  frame=single,
+                  breaklines=true,
+                  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+                }
+                \begin{lstlisting}[frame=single]
+<?php
+
+require_once "vendor/autoload.php";
+
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
+
+$connection = new AMQPStreamConnection(`localhost', 5672, `guest', `guest');
+$channel = $connection->channel();
+
+$channel->queue_declare('github', false, false, false, false);
+
+use Milo\Github\Api;
+use Milo\Github\OAuth\Configuration;
+use Milo\Github\OAuth\Token;
+use Milo\Github\OAuth\Login;
+use Milo\Github\Storages\SessionStorage;
+
+//$SEND_TO_TWITTER = FALSE;
+$SEND_TO_TWITTER = TRUE;
+
+//$appUrl = "https://guilogar.github.io";
+$appUrl = "http://localhost/universidad/sd/practicas/3/spooling_github.php";
+
+session_start();
+
+$config = new Configuration(
+    getenv("GITHUB_CLIENT_ID"),
+    getenv("GITHUB_CLIENT_SECRET_ID"),
+    [`user', `repo']
+);
+$storage = new SessionStorage;
+$login = new Login($config, $storage);
+$token = NULL;
+
+if ($login->hasToken())
+{
+    $token = $login->getToken();
+} else
+{
+    if (isset($_GET['back']))
+    {
+        $token = $login->obtainToken(
+            $_GET['code'],
+            $_GET['state']
+        );
+    } else
+    {
+        # Performs redirect to Github page
+        $login->askPermissions("$appUrl?back=1");
+    }
+}
+
+$api = new Api;
+$api->setToken($token);
+
+$en = $api->get('/user/repos');
+$repos = $api->decode($en);
+$len_repos = sizeof($repos);
+
+$host = "localhost";
+$port = "5432";
+$dbname = "sd";
+$userdb = "usuario";
+$passdb = "usuario";
+$con = pg_connect("host=$host port=$port dbname=$dbname user=$userdb password=$passdb");
+
+for($i = 0; $i < $len_repos; $i++)
+{
+    $repo = $repos[$i];
+    $name = $repo->name;
+    $full_name = $repo->full_name;
+    
+    $branches = $api->decode($api->get("repos/$full_name/branches"));
+    foreach($branches as $k => $b)
+    {
+        $branch_name = $b->name;
+        $last_commit = $b->commit->sha;
+        $query = "select * from repositorios where full_name = '$full_name' ".
+                 " and branch_name = '$branch_name' and last_commit = '$last_commit'";
+        
+        $res = pg_query($con, $query);
+        $existe_commit = pg_fetch_result($res, 0);
+        
+        if(! $existe_commit)
+        {
+            $query = "select * from repositorios where full_name = '$full_name' ".
+                     " and branch_name = '$branch_name' and last_commit!= '$last_commit'";
+            
+            $res = pg_query($con, $query);
+            $fila = pg_fetch_result($res, 0);
+            
+            if($fila)
+            {
+                pg_update($con, "repositorios",
+                array(
+                    `last_commit' => $last_commit,
+                ), array(
+                    `full_name' => $full_name,
+                    `branch_name' => $branch_name,
+                ));
+            } else
+            {
+                pg_insert($con, "repositorios", array(
+                    `full_name' => $full_name,
+                    `branch_name' => $branch_name,
+                    `last_commit' => $last_commit,
+                ));
+            }
+
+            if(isset($SEND_TO_TWITTER) && $SEND_TO_TWITTER)
+            {
+                $commit = $api->decode($api->get("repos/$full_name/commits/$last_commit"));
+                
+                $info_commit = array(
+                    `repo_name' => $full_name,
+                    `branch_name' => $branch_name,
+                    `commiter' => $commit->committer,
+                    `date' => $commit->commit->committer->date,
+                    `html_url' => $commit->html_url,
+                    `files' => $commit->files
+                );
+                $msg = new AMQPMessage(json_encode($info_commit));
+                $channel->basic_publish($msg, '', `github');
+            }
+        }
+    }
+}
+
+pg_close($con);
+
+$channel->close();
+$connection->close();
+
+                \end{lstlisting}
+            \item \underline{composer.json}: \verbatiminput{composer.json}
+        \end{enumerate}
+    \item \underline{2º Parte (Guillermo Girón García)}:\ldots\ldots\ldots\ldots\ldots
+    \item \underline{3º Parte (Teodoro Martínez \ldots)}:\ldots\ldots\ldots\ldots\ldots
+\end{enumerate}
 
 \end{document}
