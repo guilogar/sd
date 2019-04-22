@@ -30,8 +30,8 @@ Nuestro sistema se basa en informar de toda actividad de un usuario
 en concreto de github a la plataforma de red social Twitter, y si es
 posible, hacer una copia de seguridad de los ficheros afectados
 del repositorio donde el usuario ha hecho los cambios que ha considerado
-oportunos, en google drive, en dropbox o en cualquier otro sistemas
-de ficheros optimo.
+oportunos, en google drive, en dropbox o en cualquier otra plataforma
+de almacenamiento oportuno.
 
 \textbf{2º Parte. Descripción de las partes a realizar.}\\
 La actividad se ha descompuesto en 3 partes bien diferenciadas.
@@ -48,7 +48,12 @@ A continuación, las enumeramos.
         información cambia, el programa la refresca en la base de datos y, como se
         ha dicho antes, la introduce en forma de JSON en una cola del sistema
         rabbitmq.
-    \item \underline{2º Parte (Guillermo Girón García)}:\ldots\ldots\ldots\ldots\ldots
+    \item \underline{2º Parte (Guillermo Girón García)}: Consiste en obtener la información
+        contenida en una cola de rabbitmq mediante spooling, separarla en los campos
+        necesarios, después de un "loggin" en Twitter, publicar un pequeño mensaje en 
+        la red social que indique que se ha realizado un commit en la cuenta de GitHub del
+        usuario, y permita enlazar al mismo, para observar todos los cambios y el mensaje del
+        commit. 
     \item \underline{3º Parte (Teodoro Martínez \ldots)}:\ldots\ldots\ldots\ldots\ldots
 \end{enumerate}
 
@@ -62,7 +67,13 @@ Las tecnologías usadas son las siguientes:
         poder realizar acciones sobre las colas del sistema rabbitmq (es posible su
         instalación mediante composer). Además, la versión del servidor apache es la
         2.2, la versión de PostgreSQL es la 9.5 y del interprete PHP es la 7.2
-    \item \underline{2º Parte (Guillermo Girón García)}:\ldots\ldots\ldots\ldots\ldots
+    \item \underline{2º Parte (Guillermo Girón García)}: Se ha utilizado Python 3 como
+    lenguaje de programación para la implementación, con las siguientes bibliotecas:
+    \begin{enumerate}
+        \item Pika, para trabajar de forma sencilla con las colas de rabbitmq. 
+        \item Python-Twitter, para acceder de manera sencilla a la api de Twitter. 
+        \item La carga de los credenciales de las cuentas de twitter y dropbox se realizan desde un fichero Json.
+    \end{enumerate} 
     \item \underline{3º Parte (Teodoro Martínez \ldots)}:\ldots\ldots\ldots\ldots\ldots
 \end{enumerate}
 
