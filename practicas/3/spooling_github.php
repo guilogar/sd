@@ -132,3 +132,4 @@ pg_close($con);
 $channel->close();
 $connection->close();
 
+//session_destroy();
