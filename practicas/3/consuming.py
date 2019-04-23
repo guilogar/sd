@@ -2,16 +2,21 @@ import pika
 import json
 import twitter
 import urllib
+import dropbox
+import pydrive
+import sys
 
 #Global data needed
-with open('twitter_credentials.json', 'r') as read_file:
+with open('credentials.json', 'r') as read_file:
     credentials = json.load(read_file)
 
 #Login in twitter
-api = twitter.Api(consumer_key=credentials["CONSUMER_KEY"],
-                  consumer_secret=credentials["CONSUMER_SECRET"],
-                  access_token_key=credentials["ACCESS_TOKEN_KEY"],
-                  access_token_secret=credentials["ACCESS_TOKEN_SECRET"])
+apiTwitter = twitter.Api(consumer_key=credentials['twitter']["CONSUMER_KEY"],
+                  consumer_secret=credentials['twitter']["CONSUMER_SECRET"],
+                  access_token_key=credentials['twitter']["ACCESS_TOKEN_KEY"],
+                  access_token_secret=credentials['twitter']["ACCESS_TOKEN_SECRET"])
+
+#Login in Dropbox
 
 commit_data = {}
 json_data = {}
@@ -25,10 +30,11 @@ def on_consuming(channel, method, properties, body):
     #Consumers needs to be closed or they'll be iterating forever
     channel.cancel()
     on_twitter_publishing(commit_data)
+    on_dropbox_storing(commit_data)
 
 def on_twitter_publishing(data):
     url = urllib.parse.quote_plus(data['url'])
-    status = api.PostUpdate(status='Hello world!\n'+data['url'])
+    status = apiTwitter.PostUpdate(status='Hello world!\n'+data['url'])
 
 #Rabbitmq connection
 parameters = pika.ConnectionParameters('localhost')
