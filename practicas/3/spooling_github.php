@@ -16,6 +16,8 @@ use Milo\Github\OAuth\Token;
 use Milo\Github\OAuth\Login;
 use Milo\Github\Storages\SessionStorage;
 
+session_start();
+
 //$SEND_TO_TWITTER = FALSE;
 $SEND_TO_TWITTER = TRUE;
 
