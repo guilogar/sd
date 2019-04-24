@@ -22,11 +22,9 @@ $SEND_TO_TWITTER = TRUE;
 //$appUrl = "https://guilogar.github.io";
 $appUrl = "http://localhost/universidad/sd/practicas/3/spooling_github.php";
 
-session_start();
-
 $config = new Configuration(
-    getenv("GITHUB_CLIENT_ID"),
-    getenv("GITHUB_CLIENT_SECRET_ID"),
+    getenv('GITHUB_CLIENT_ID'),
+    getenv('GITHUB_CLIENT_SECRET_ID'),
     ['user', 'repo']
 );
 $storage = new SessionStorage;
