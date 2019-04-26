@@ -23,20 +23,31 @@ json_data = {}
 
 #Here I receive the message from rabbit    
 def on_consuming(channel, method, properties, body):
+
     #Storage data and dump it from json
-    type(body);
-    print("\n\n");
+    print(type(body))
+    print("\n\n")
     commit_data = json.loads(body)
+
     #Queues have to confirm message delivery
     channel.basic_ack(delivery_tag=method.delivery_tag)
+
     #Consumers needs to be closed or they'll be iterating forever
     channel.cancel()
-    type(commit_data);
-    print("\n\n");
-    print(commit_data);
-    #on_twitter_publishing(commit_data)
-    #on_dropbox_storing(commit_data) #Function for Teodoro
-    #on_drive_storing(commit_data)
+
+    print(type(commit_data))
+    with open('commit_data.json', 'w') as outfile:
+        json.dump(commit_data, outfile)
+
+    #Filtering data to 
+    if(credentials['github']['REPO_1'] or credentials['github']['REPO_2'] in commit_data['repo_name']):
+        if(commit_data['commiter']['login'] == credentials['github']['REPO_1'] or credentials['github']['REPO_2']
+        or credentials['github']['REPO_3']):
+            #on_twitter_publishing(commit_data['repo_name'], commit_data['commiter']['login'], 
+            #commit_data['html_url'])
+            #on_dropbox_storing(commit_data) #Function for Teodoro
+            #on_drive_storing(commit_data)
+            pass
 
 def on_twitter_publishing(data):
     #url = urllib.parse.quote_plus(data['url'])
@@ -44,10 +55,10 @@ def on_twitter_publishing(data):
     ' follow link to discover the changes ' + 'repoURL')
 
 def on_dropbox_storing(data): #Complete these functions, Teo
-    pass;
+    pass
 
 def on_drive_storing(data):
-    pass;
+    pass
 
 #Rabbitmq connection
 parameters = pika.ConnectionParameters('localhost')
