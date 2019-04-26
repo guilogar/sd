@@ -49,7 +49,7 @@ def on_twitter_publishing(repo, commiter, url_raw):
     print(url_raw)
     #url = furl(url_raw)
     status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
-    ' follow link to discover the changes.', attachment_url=url)
+    ' follow link to discover the changes.', attachment_url=url_raw)
 
 def on_dropbox_storing(data): #Complete these functions, Teo
     pass
