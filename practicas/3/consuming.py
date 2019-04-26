@@ -46,7 +46,8 @@ def on_consuming(channel, method, properties, body):
 
 def on_twitter_publishing(repo, commiter, url_raw):
     #url = urllib.parse.quote_plus(url_raw)
-    url = furl(url_raw)
+    print(url_raw)
+    #url = furl(url_raw)
     status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
     ' follow link to discover the changes.', attachment_url=url)
 
