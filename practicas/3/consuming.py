@@ -46,10 +46,10 @@ def on_consuming(channel, method, properties, body):
 
 def on_twitter_publishing(repo, commiter, url_raw):
     #Formating url
-    url = furl(url_raw)
+    #url = furl(url_raw)
     #Tweeting
     status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
-    ' follow link to discover the changes.\n' + url)
+    ' follow link to discover the changes.\n' + url_raw)
 
 def on_dropbox_storing(data): #Complete these functions, Teo
     pass
