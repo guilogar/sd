@@ -1,7 +1,7 @@
 import pika
 import json
 import twitter
-import furl
+from furl import furl
 import dropbox
 import pydrive
 
@@ -46,10 +46,9 @@ def on_consuming(channel, method, properties, body):
 
 def on_twitter_publishing(repo, commiter, url_raw):
     #url = urllib.parse.quote_plus(url_raw)
-    print(url_raw)
-    #url = furl(url_raw)
+    url = furl(url_raw)
     status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
-    ' follow link to discover the changes.', attachment_url=url_raw)
+    ' follow link to discover the changes.', attachment_url=url)
 
 def on_dropbox_storing(data): #Complete these functions, Teo
     pass
