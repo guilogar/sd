@@ -1,7 +1,7 @@
 import pika
 import json
 import twitter
-import urllib
+import furl
 import dropbox
 import pydrive
 
@@ -25,8 +25,6 @@ json_data = {}
 def on_consuming(channel, method, properties, body):
 
     #Storage data and dump it from json
-    print(type(body))
-    print("\n\n")
     commit_data = json.loads(body)
 
     #Queues have to confirm message delivery
@@ -35,24 +33,22 @@ def on_consuming(channel, method, properties, body):
     #Consumers needs to be closed or they'll be iterating forever
     channel.cancel()
 
-    print(type(commit_data))
-    with open('commit_data.json', 'w') as outfile:
-        json.dump(commit_data, outfile)
-
-    #Filtering data to 
+    #Filtering data to only publish changes made by the repository owners
     if(credentials['github']['REPO_1'] or credentials['github']['REPO_2'] in commit_data['repo_name']):
         if(commit_data['commiter']['login'] == credentials['github']['REPO_1'] or credentials['github']['REPO_2']
         or credentials['github']['REPO_3']):
-            #on_twitter_publishing(commit_data['repo_name'], commit_data['commiter']['login'], 
-            #commit_data['html_url'])
-            #on_dropbox_storing(commit_data) #Function for Teodoro
-            #on_drive_storing(commit_data)
-            pass
+            on_twitter_publishing(commit_data['repo_name'], commit_data['commiter']['login'], 
+            commit_data['html_url'])
 
-def on_twitter_publishing(data):
-    #url = urllib.parse.quote_plus(data['url'])
-    status = apiTwitter.PostUpdate(status='New Commit from: ' + 'commiter' +  ' on: ' + 'repoName' + 
-    ' follow link to discover the changes ' + 'repoURL')
+            #Start working here, Teo
+            #on_dropbox_storing() 
+            #on_drive_storing()
+
+def on_twitter_publishing(repo, commiter, url_raw):
+    #url = urllib.parse.quote_plus(url_raw)
+    url = furl(url_raw)
+    status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
+    ' follow link to discover the changes.', attachment_url=url)
 
 def on_dropbox_storing(data): #Complete these functions, Teo
     pass
