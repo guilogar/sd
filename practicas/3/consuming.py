@@ -41,7 +41,7 @@ def on_consuming(channel, method, properties, body):
             commit_data['html_url'])
 
             #Start working here, Teo
-            #on_dropbox_storing() 
+            #on_dropbox_storing(as) 
             #on_drive_storing()
 
 def on_twitter_publishing(repo, commiter, url_raw):
