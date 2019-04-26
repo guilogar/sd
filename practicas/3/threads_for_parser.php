@@ -11,12 +11,12 @@ class Commits extends Threaded
     
     public function __construct()
     {
-        $this->commits = array();
+        $this->commits = (array) array();
     }
     
     public function add(array $commit)
     {
-        array_push($this->commits, $commit);
+        array_push($this->commits, (array) $commit);
     }
 }
 
@@ -62,7 +62,7 @@ class Parser extends Volatile
                 $query = "select * from repositorios where full_name = '$full_name' ".
                          " and branch_name = '$branch_name' and last_commit = '$last_commit'";
                 
-                $this->cerrojo->synchronized(function ($con, $query, $full_name, $branch_name, $last_commit)
+                $this->cerrojo->synchronized(function ($con, $query, $api, $full_name, $branch_name, $last_commit, $SEND_TO_TWITTER)
                 {
                     $res = pg_query($con, $query);
                     $existe_commit = pg_fetch_result($res, 0);
@@ -72,7 +72,7 @@ class Parser extends Volatile
                         $query = "select * from repositorios where full_name = '$full_name' ".
                                  " and branch_name = '$branch_name' and last_commit != '$last_commit'";
 
-                        $this->cerrojo->synchronized(function ($con, $query, $full_name, $branch_name, $last_commit)
+                        $this->cerrojo->synchronized(function ($con, $query, $api, $full_name, $branch_name, $last_commit, $SEND_TO_TWITTER)
                         {
                             $res = pg_query($con, $query);
                             $fila = pg_fetch_result($res, 0);
@@ -108,18 +108,18 @@ class Parser extends Volatile
                                     'files' => $commit->files
                                 );
                                 
-                                var_dump($info_commit);
+                                //var_dump($info_commit);
                                 $this->cerrojo->synchronized(function ($commits, $info_commit) {
-                                    $commits->add($info_commit);
+                                    $commits->add((array) $info_commit);
                                 }, $this->commits, $info_commit);
                                 /*
                                  *$msg = new AMQPMessage(json_encode($info_commit));
                                  *$channel->basic_publish($msg, '', 'github');
                                  */
                             }
-                        }, $con, $query, $full_name, $branch_name, $last_commit);
+                        }, $con, $query, $api, $full_name, $branch_name, $last_commit, $SEND_TO_TWITTER);
                     }
-                }, $con, $query, $full_name, $branch_name, $last_commit);
+                }, $con, $query, $api, $full_name, $branch_name, $last_commit, $SEND_TO_TWITTER);
             }
         }
     }
