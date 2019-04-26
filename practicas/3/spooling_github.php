@@ -76,11 +76,15 @@ if(class_exists('Thread'))
     $max = $ventana;
     
     $pool = new Pool($num_cores);
+    $threads = array();
+    $c = new Commits();
+    $cerrojo = new Cerrojo();
     
     for($i = 0; $i < $num_cores; $i++)
     {
         $rr = array_slice($repos, $min, $max);
-        $p = new Parser($con, $rr, $SEND_TO_TWITTER, $api);
+        $p = new Parser($con, $rr, $SEND_TO_TWITTER, $api, $c, $cerrojo);
+        array_push($threads, $p);
         $pool->submit($p);
         
         $min = $max + 1;
@@ -90,12 +94,20 @@ if(class_exists('Thread'))
     if($max < $len_repos - 1)
     {
         $rr = array_slice($repos, $min, $len_repos - 1);
-        $p = new Parser($con, $rr, $SEND_TO_TWITTER, $api);
+        $p = new Parser($con, $rr, $SEND_TO_TWITTER, $api, $c, $cerrojo);
+        array_push($threads, $p);
         $pool->submit($p);
     }
 
     while($pool->collect());
     $pool->shutdown();
+    
+    /*
+     *foreach ($threads as $t)
+     *{
+     *    var_dump((array) $c->commits);
+     *}
+     */
 } else
 {
     for($i = 0; $i < $len_repos; $i++)
