@@ -62,10 +62,7 @@ $repos = $api->decode($en);
 
 $len_repos = sizeof($repos);
 
-$con = pg_connect("host=$HOST_DB port=$PORT_DB dbname=$NAME_DB user=$USER_DB password=$PASS_DB");
-
 if(class_exists('Thread'))
-//if(false)
 {
     require_once "threads_for_parser.php";
     require_once "utils_for_concurrency.php";
@@ -83,7 +80,7 @@ if(class_exists('Thread'))
     for($i = 0; $i < $num_cores; $i++)
     {
         $rr = array_slice($repos, $min, $max);
-        $p = new Parser($con, $rr, $SEND_TO_TWITTER, $api, $c, $cerrojo);
+        $p = new Parser($rr, $SEND_TO_TWITTER, $api, $c, $cerrojo);
         array_push($threads, $p);
         $pool->submit($p);
         
@@ -94,7 +91,7 @@ if(class_exists('Thread'))
     if($max < $len_repos - 1)
     {
         $rr = array_slice($repos, $min, $len_repos - 1);
-        $p = new Parser($con, $rr, $SEND_TO_TWITTER, $api, $c, $cerrojo);
+        $p = new Parser($rr, $SEND_TO_TWITTER, $api, $c, $cerrojo);
         array_push($threads, $p);
         $pool->submit($p);
     }
@@ -110,6 +107,7 @@ if(class_exists('Thread'))
      */
 } else
 {
+    $con = pg_connect("host=".HOST_DB." port=".PORT_DB." dbname=".NAME_DB." user=".USER_DB." password=".PASS_DB);
     for($i = 0; $i < $len_repos; $i++)
     {
         $repo = $repos[$i];
