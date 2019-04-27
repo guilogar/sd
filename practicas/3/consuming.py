@@ -47,7 +47,7 @@ def on_twitter_publishing(repo, commiter, url_raw):
     status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
     ' follow link to discover the changes.\n' + url_raw)
 
-def on_dropbox_storing(data): 
+def on_dropbox_storing(datafiles): 
 	#Check that dropbox login has been successful
     	try:
 		dbx.users_get_current_account()
@@ -55,7 +55,7 @@ def on_dropbox_storing(data):
 		print("ERROR: Could not login to Dropbox.")
 	
 	#Get every file that the json objects indicates
-	for files in data['files']:
+	for files in datafiles:
 		#Download the file from url in local directory
 		urllib.urlretrieve(files["raw_url"], "gitfile")
 
