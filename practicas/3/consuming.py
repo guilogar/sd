@@ -22,7 +22,7 @@ dbx = dropbox.Dropbox(credentials['dropbox']["ACCESS_TOKEN"])
 commit_data = {}
 json_data = {}
 
-#Here I receive the message from rabbit    
+#Here I receive the message from rabbit
 def on_consuming(channel, method, properties, body):
 
     #Storage data and dump it from json
@@ -44,16 +44,16 @@ def on_consuming(channel, method, properties, body):
 
 def on_twitter_publishing(repo, commiter, url_raw):
     #Tweeting
-    status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
+    status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo +
     ' follow link to discover the changes.\n' + url_raw)
 
-def on_dropbox_storing(datafiles): 
+def on_dropbox_storing(datafiles):
 	#Check that dropbox login has been successful
-    	try:
+	try:
 		dbx.users_get_current_account()
 	except dropbox.exceptions.AuthError as err:
 		print("ERROR: Could not login to Dropbox.")
-	
+
 	#Get every file that the json objects indicates
 	for files in datafiles:
 		#Download the file from url in local directory
@@ -65,7 +65,7 @@ def on_dropbox_storing(datafiles):
 		#Remove the downloaded file
 		os.remove("gitfile")
 
-	
+
 
 #Rabbitmq connection
 parameters = pika.ConnectionParameters('localhost')
@@ -76,7 +76,7 @@ channel.basic_consume(queue='github', on_message_callback=on_consuming)
 #Spooling
 try:
     channel.start_consuming()
-    connection.sleep(5.0)   
+    connection.sleep(5.0)
 except KeyboardInterrupt:
     channel.stop_consuming()
     connection.close()
