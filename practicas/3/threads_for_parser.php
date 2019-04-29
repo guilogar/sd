@@ -4,18 +4,20 @@ require_once "conection_to_db.php";
 
 class Cerrojo extends Threaded { }
 
-class Commits extends Threaded
+class Commits extends Volatile
 {
     public $commits;
     
     public function __construct()
     {
-        $this->commits = (array) array();
+        $this->commits = [];
     }
     
     public function add(array $commit)
     {
-        array_push($this->commits, (array) $commit);
+        $this->commits[sizeof($this->commits)] = (object) $commit;
+        //array_push($this->commits, $commit);
+        //echo sizeof($this->commits) . "\n";
     }
 }
 
@@ -42,7 +44,6 @@ class Parser extends Volatile
         $api = $this->api;
         $repos = $this->repos;
         $len_repos = sizeof($repos);
-        $channel = $this->channel_mq;
         
         for($i = 0; $i < $len_repos; $i++)
         {

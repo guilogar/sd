@@ -97,14 +97,16 @@ if(class_exists('Thread'))
     }
 
     while($pool->collect());
+    
     $pool->shutdown();
     
-    /*
-     *foreach ($threads as $t)
-     *{
-     *    var_dump((array) $c->commits);
-     *}
-     */
+    //var_dump($c->commits);
+    //echo sizeof($c->commits) . "\n";
+    foreach ($c->commits as $commit)
+    {
+        $msg = new AMQPMessage(json_encode($commit));
+        $channel->basic_publish($msg, '', 'github');
+    }
 } else
 {
     $con = pg_connect("host=".HOST_DB." port=".PORT_DB." dbname=".NAME_DB." user=".USER_DB." password=".PASS_DB);
