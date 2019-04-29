@@ -1,3 +1,4 @@
+-- base\_de\_datos/sql.sql
 -- La base de datos es PostgreSQL
 -- Para instalar en linux: sudo apt install postgresql
 -- Para instalar en windows: ni idea

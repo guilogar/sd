@@ -1,7 +1,7 @@
-<?php
+<?php // spooling_github.php
 
 require_once "vendor/autoload.php";
-require_once "conection_to_db.php";
+require_once "utils_php/conection_to_db.php";
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -64,8 +64,8 @@ $len_repos = sizeof($repos);
 
 if(class_exists('Thread'))
 {
-    require_once "threads_for_parser.php";
-    require_once "utils_for_concurrency.php";
+    require_once "utils_php/threads_for_parser.php";
+    require_once "utils_php/utils_for_concurrency.php";
     
     $num_cores = num_system_cores();
     $min = 0;

@@ -1,3 +1,4 @@
+# /etc/apache2/envvars
 # envvars - default environment variables for apache2ctl
 
 # this won't be correct after changing uid
@@ -31,6 +32,7 @@ export LANG
 
 export GITHUB_CLIENT_ID=....................
 export GITHUB_CLIENT_SECRET_ID=........................................
+export GITHUB_ACCESS_TOKEN=........................................
 
 ## The command to get the status for 'apache2ctl status'.
 ## Some packages providing 'www-browser' need '--dump' instead of '-dump'.

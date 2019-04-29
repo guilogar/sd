@@ -1,4 +1,4 @@
-<?php
+<?php // utils_php/conection_to_db.php
 
 define('HOST_DB', "localhost");
 define('PORT_DB', "5432"     );

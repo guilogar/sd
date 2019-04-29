@@ -1,4 +1,4 @@
-<?php
+<?php // utils_php/threads_for_parser.php
 
 require_once "conection_to_db.php";
 
@@ -16,8 +16,6 @@ class Commits extends Volatile
     public function add(array $commit)
     {
         $this->commits[sizeof($this->commits)] = (object) $commit;
-        //array_push($this->commits, $commit);
-        //echo sizeof($this->commits) . "\n";
     }
 }
 
@@ -109,7 +107,7 @@ class Parser extends Volatile
                     }, $last_commit, $full_name, $branch_name);
                 }
 
-                if(isset($SEND_TO_TWITTER) && $SEND_TO_TWITTER)
+                if($res !== 1 && isset($SEND_TO_TWITTER) && $SEND_TO_TWITTER)
                 {
                     $commit = $api->decode($api->get("repos/$full_name/commits/$last_commit"));
                     

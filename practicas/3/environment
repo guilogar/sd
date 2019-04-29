@@ -1,5 +1,0 @@
-PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/android-studio/bin"
-ANDROID_HOME=$HOME/Android/Sdk
-GITHUB_CLIENT_ID="c323339850d672ad4a8e"
-GITHUB_CLIENT_SECRET_ID="0faa1ff679879f86cc21a5a064cef853aa634a56"
-GITHUB_ACCESS_TOKEN="0677ea0c5f7de4092d0f41d1969a23f1a70c6932"

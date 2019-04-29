@@ -1,0 +1,6 @@
+# /etc/environment
+# Otras variables del usuario en cuestion.
+
+GITHUB_CLIENT_ID="...................."
+GITHUB_CLIENT_SECRET_ID="........................................"
+GITHUB_ACCESS_TOKEN="........................................"
