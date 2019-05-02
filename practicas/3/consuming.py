@@ -41,7 +41,7 @@ def on_consuming(channel, method, properties, body):
         (commit_data['commiter']['login'] == credentials['github']['REPO_2']) or
         (commit_data['commiter']['login'] == credentials['github']['REPO_3']))):
             on_twitter_publishing(commit_data['repo_name'], commit_data['commiter']['login'], commit_data['html_url'])
-            on_dropbox_storing(commit_data)
+            on_dropbox_storing(commit_data['files'])
 
 def on_twitter_publishing(repo, commiter, url_raw):
     #Tweeting
