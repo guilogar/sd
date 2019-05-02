@@ -1,12 +1,24 @@
 <?php // spooling_github.php
 
+function exception_error_handler($errno, $errstr, $errfile, $errline ) {
+    throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+}
+set_error_handler("exception_error_handler");
+ini_set("memory_limit", -1);
+
 require_once "vendor/autoload.php";
 require_once "utils_php/conection_to_db.php";
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-$connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
+try
+{
+    $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
+} catch(Exception $e)
+{
+    die($e->getMessage());
+}
 $channel = $connection->channel();
 
 $channel->queue_declare('github', false, false, false, false);
@@ -51,29 +63,47 @@ $api->setToken($token);
 
 $repos = array();
 $en = NULL;
+$page = 1;
+$per_page = 100;
+$string_request = "/user/repos?per_page=$per_page&page=";
+
 if($user_gh !== NULL)
 {
-    $en = $api->get("/users/$user_gh/repos");
-} else
-{
-    $en = $api->get("/user/repos");
+    $string_request = "/users/$user_gh/repos?per_page=$per_page&page=";
 }
-$repos = $api->decode($en);
+
+do
+{
+    $en = $api->get($string_request . $page++);
+    $repos = array_merge($repos, $api->decode($en));
+} while($en);
 
 $len_repos = sizeof($repos);
+
+echo $len_repos;die();
+try
+{
+    $con = @pg_connect("host=".HOST_DB." port=".PORT_DB." dbname=".NAME_DB." user=".USER_DB." password=".PASS_DB);
+} catch(Exception $e)
+{
+    die($e->getMessage());
+}
 
 if(class_exists('Thread'))
 {
     require_once "utils_php/threads_for_parser.php";
     require_once "utils_php/utils_for_concurrency.php";
-    
+
+    $cb = 0.3;
     $num_cores = num_system_cores();
+    $tam_pool = (int) ($num_cores / (1 - $cb));
+    
     $min = 0;
     $ventana = (int) ($len_repos / $num_cores);
     $max = $ventana;
     
-    $pool = new Pool($num_cores);
     $threads = array();
+    $pool = new Pool($tam_pool);
     $c = new Commits();
     $cerrojo = new Cerrojo();
     
@@ -100,16 +130,13 @@ if(class_exists('Thread'))
     
     $pool->shutdown();
     
-    //var_dump($c->commits);
-    //echo sizeof($c->commits) . "\n";
-    foreach ($c->commits as $commit)
+    foreach ($c->data as $commit)
     {
         $msg = new AMQPMessage(json_encode($commit));
         $channel->basic_publish($msg, '', 'github');
     }
 } else
 {
-    $con = pg_connect("host=".HOST_DB." port=".PORT_DB." dbname=".NAME_DB." user=".USER_DB." password=".PASS_DB);
     for($i = 0; $i < $len_repos; $i++)
     {
         $repo = $repos[$i];
