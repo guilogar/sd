@@ -63,6 +63,7 @@ $api->setToken($token);
 
 $repos = array();
 $en = NULL;
+$en_decode = array();
 $page = 1;
 $per_page = 100;
 $string_request = "/user/repos?per_page=$per_page&page=";
@@ -74,13 +75,19 @@ if($user_gh !== NULL)
 
 do
 {
-    $en = $api->get($string_request . $page++);
-    $repos = array_merge($repos, $api->decode($en));
-} while($en);
+    try
+    {
+        $en = $api->get($string_request . $page++);
+        $en_decode = $api->decode($en);
+    } catch(Exception $e)
+    {
+        die($e->getMessage());
+    }
+    $repos = array_merge($repos, $en_decode);
+} while($en_decode);
 
 $len_repos = sizeof($repos);
 
-echo $len_repos;die();
 try
 {
     $con = @pg_connect("host=".HOST_DB." port=".PORT_DB." dbname=".NAME_DB." user=".USER_DB." password=".PASS_DB);
@@ -107,7 +114,7 @@ if(class_exists('Thread'))
     $c = new Commits();
     $cerrojo = new Cerrojo();
     
-    for($i = 0; $i < $num_cores; $i++)
+    for($i = 0; $i < $tam_pool; $i++)
     {
         $rr = array_slice($repos, $min, $max);
         $p = new Parser($rr, $SEND_TO_TWITTER, $api, $c, $cerrojo);
