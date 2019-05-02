@@ -91,7 +91,7 @@ Las tecnologías usadas son las siguientes:
                   breaklines=true,
                   postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
                 }
-                \lstinputlisting[]{sql.sql}
+                \lstinputlisting[]{base_de_datos/sql.sql}
             \item \underline{Código de Servidor PHP}:
                 \lstset{
                   texcl=true,
@@ -102,6 +102,33 @@ Las tecnologías usadas son las siguientes:
                   postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
                 }
                 \lstinputlisting[]{spooling_github.php}
+                \lstset{
+                  texcl=true,
+                  basicstyle=\ttfamily,
+                  columns=fullflexible,
+                  frame=single,
+                  breaklines=true,
+                  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+                }
+                \lstinputlisting[]{utils_php/threads_for_parser.php}
+                \lstset{
+                  texcl=true,
+                  basicstyle=\ttfamily,
+                  columns=fullflexible,
+                  frame=single,
+                  breaklines=true,
+                  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+                }
+                \lstinputlisting[]{utils_php/utils_for_concurrency.php}
+                \lstset{
+                  texcl=true,
+                  basicstyle=\ttfamily,
+                  columns=fullflexible,
+                  frame=single,
+                  breaklines=true,
+                  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+                }
+                \lstinputlisting[]{utils_php/conection_to_db.php}
             \item \underline{composer.json}:
                 \lstinputlisting[]{composer.json}
         \end{enumerate}
@@ -126,6 +153,104 @@ se sustituye el valor de las claves anteriormente citadas por puntos suspensivos
   breaklines=true,
   postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 }
-\lstinputlisting[]{envvars}
+\lstinputlisting[]{configuracion_de_entorno/envvars}
 
+Por otra parte, si queremos ejecutar el script sin un servidor apache2 corriendo, siempre podemos hacerlo
+usando el interprete de php usando `php spooling\_github.php'. Pero para ello, debemos insertar
+una variables de entorno del sistema en el archivo `/etc/environment'. He aquí el contenido de dicho
+archivo, donde, se sustituye el valor de las claves anteriormente citadas por puntos suspensivos
+(\ldots).
+
+\lstset{
+  texcl=true,
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  frame=single,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+\lstinputlisting[]{configuracion_de_entorno/environment}
+
+Por último, si se desea obtener toda la potencia del php, se ha de obtener el interprete
+con la libreria pthreads instalada, para que así el programa opte por la ruta multihebrada
+y se obtenga un mejor tiempo de respuesta del script. Claro esta, mediante el uso de la
+concurrencia y de todas las técnicas necesarias para obtener una ejecución correcta y
+sin entrelazado patológico en los recursos de dominio común.
+
+He aquí los pasos a seguir para obtener dicho interprete.
+
+\begin{enumerate}
+    \item Instalar phpbrew
+    \lstset{
+      texcl=true,
+      basicstyle=\ttfamily,
+      columns=fullflexible,
+      frame=single,
+      breaklines=true,
+      postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    }
+    \begin{lstlisting}[frame=single]
+curl -L -O https://github.com/phpbrew/phpbrew/raw/master/phpbrew
+chmod +x phpbrew
+
+# Move phpbrew to somewhere can be found by your $PATH
+sudo mv phpbrew /usr/local/bin/phpbrew
+    \end{lstlisting}
+    
+    \item Instalar la version de php 7.2 con la libreria pthreads añadida,
+          junto con el modulo para las funciones de acceso a base de datos
+          PostgreSQL\. Claro esta, esto tomará cierto tiempo, ya que, se
+          compila un interprete entero de php.
+    \lstset{
+      texcl=true,
+      basicstyle=\ttfamily,
+      columns=fullflexible,
+      frame=single,
+      breaklines=true,
+      postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    }
+    \begin{lstlisting}[frame=single]
+phpbrew init
+
+# Antes de ejecutar esto, se tiene que instalar lo siguiente:
+# postgresql-server-dev-all
+# Se instala con: sudo apt install postgresql-server-dev-all en debian y derivados
+phpbrew install php-7.2.12 +default -- --with-openssl --enable-maintainer-zts --with-libdir=lib64 --with-pgsql='/usr/bin'
+    \end{lstlisting}
+    
+    \item Poner el interprete de php nuevo compilado, por defecto en el sistema.
+    \lstset{
+      texcl=true,
+      basicstyle=\ttfamily,
+      columns=fullflexible,
+      frame=single,
+      breaklines=true,
+      postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    }
+    \begin{lstlisting}[frame=single]
+sudo cp \~/.phpbrew/php/php-7.2.12/bin/* /bin
+sudo cp \~/.phpbrew/php/php-7.2.12/bin/* /usr/bin
+    \end{lstlisting}
+    Se recomienda hacer las dos acciones, aunque con la primera es más que suficiente si no se tiene
+    instalado en el sistema ninguna versión del php. Si ya se tiene una version instalada de los
+    repositorios, entonces se debería realizar las dos acciones.
+    
+    \item Comprobar si ha tenido exito la operacion con las dos siguientes acciones.
+    \lstset{
+      texcl=true,
+      basicstyle=\ttfamily,
+      columns=fullflexible,
+      frame=single,
+      breaklines=true,
+      postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    }
+    \begin{lstlisting}[frame=single]
+php -r "echo PHP_ZTS;"
+php -r "print_r(class_exists('Thread'));"
+    \end{lstlisting}
+    Si ha tenido exito, deberia retornar cada operacion un `1'. Sino,
+    habrá que repetir el proceso o bien, solventar las pequeñas diferencias
+    que haya si se intenta instalar en alguna distribución de GNU/Linux
+    atípica, Mac OSX o incluso (Dios no lo quiera), Windows.
+\end{enumerate}
 \end{document}

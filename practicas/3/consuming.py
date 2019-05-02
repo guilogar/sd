@@ -3,6 +3,8 @@ import json
 import twitter
 from furl import furl
 import dropbox
+import urllib
+import os
 import pydrive
 
 #Global data needed
@@ -16,7 +18,7 @@ apiTwitter = twitter.Api(consumer_key=credentials['twitter']["CONSUMER_KEY"],
                   access_token_secret=credentials['twitter']["ACCESS_TOKEN_SECRET"])
 
 #Login in Dropbox
-#apiDropbox = #Continue here..
+dbx = dropbox.Dropbox(credentials['dropbox']["ACCESS_TOKEN"])
 
 commit_data = {}
 json_data = {}
@@ -37,23 +39,34 @@ def on_consuming(channel, method, properties, body):
     if(credentials['github']['REPO_1'] or credentials['github']['REPO_2'] in commit_data['repo_name']):
         if(commit_data['commiter']['login'] == credentials['github']['REPO_1'] or credentials['github']['REPO_2']
         or credentials['github']['REPO_3']):
-            on_twitter_publishing(commit_data['repo_name'], commit_data['commiter']['login'], 
-            commit_data['html_url'])
+            on_twitter_publishing(commit_data['repo_name'], commit_data['commiter']['login'], commit_data['html_url'])
 
-            #Start working here, Teo
-            #on_dropbox_storing(as) 
-            #on_drive_storing()
+            on_dropbox_storing(commit_data)
 
 def on_twitter_publishing(repo, commiter, url_raw):
     #Tweeting
     status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
     ' follow link to discover the changes.\n' + url_raw)
 
-def on_dropbox_storing(data): #Complete these functions, Teo
-    pass
+def on_dropbox_storing(datafiles): 
+	#Check that dropbox login has been successful
+    	try:
+		dbx.users_get_current_account()
+	except dropbox.exceptions.AuthError as err:
+		print("ERROR: Could not login to Dropbox.")
+	
+	#Get every file that the json objects indicates
+	for files in datafiles:
+		#Download the file from url in local directory
+		urllib.urlretrieve(files["raw_url"], "gitfile")
 
-def on_drive_storing(data):
-    pass
+		#Open the downloaded file and upload it to dropbox
+		with open('gitfile', "rb") as upload_file:
+			dbx.files_upload(upload_file.read(), "/" + files["filename"], mute = True)
+		#Remove the downloaded file
+		os.remove("gitfile")
+
+	
 
 #Rabbitmq connection
 parameters = pika.ConnectionParameters('localhost')
