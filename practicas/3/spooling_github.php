@@ -4,6 +4,20 @@ function exception_error_handler($errno, $errstr, $errfile, $errline ) {
     throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
 }
 set_error_handler("exception_error_handler");
+
+/*
+ *function fatal_handler()
+ *{
+ *    $errfile = "unknown file";
+ *    $errstr  = "shutdown";
+ *    $errno   = E_CORE_ERROR;
+ *    $errline = 0;
+ *    
+ *    throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+ *}
+ *register_shutdown_function( "fatal_handler" );
+ */
+
 ini_set("memory_limit", -1);
 
 require_once "vendor/autoload.php";
@@ -207,11 +221,9 @@ if(class_exists('Thread'))
     }
 }
 
-/*
- *pg_close($con);
- *
- *$channel->close();
- *$connection->close();
- */
+pg_close($con);
 
-//session_destroy();
+$channel->close();
+$connection->close();
+
+session_destroy();

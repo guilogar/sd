@@ -55,7 +55,8 @@ class Parser extends Threaded
             {
                 try
                 {
-                    return $api->decode($api->get("repos/$full_name/branches"));
+                    $bb = $api->decode($api->get("repos/$full_name/branches"));
+                    return $bb;
                 } catch(Exception $e)
                 {
                     die($e->getMessage());
@@ -71,7 +72,6 @@ class Parser extends Threaded
             $branches = array_merge($branches, $branches_repo);
         }
         
-        printf("%s #%lu avanza del analisis de ramas.\n", __CLASS__, Thread::getCurrentThreadId());
         // Se analiza cada rama por si ha habido cambios
         foreach($branches as $k => $b)
         {
@@ -116,7 +116,6 @@ class Parser extends Threaded
                 ));
                 pg_close($con);
             }
-            printf("%s #%lu empieza a hacer su trabajo.\n", __CLASS__, Thread::getCurrentThreadId());
             
             if($res !== 1 && isset($SEND_TO_TWITTER) && $SEND_TO_TWITTER)
             {
