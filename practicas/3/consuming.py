@@ -4,8 +4,6 @@ import twitter
 import dropbox
 import urllib
 import os
-import pydrive
-
 #Global data needed
 with open('credentials.json', 'r') as read_file:
     credentials = json.load(read_file)
