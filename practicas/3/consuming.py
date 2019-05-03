@@ -62,7 +62,7 @@ def on_dropbox_storing(datafiles):
 
 		#Open the downloaded file and upload it to dropbox
 		with open('gitfile', "rb") as upload_file:
-			dbx.files_upload(upload_file.read(), "/" + files["filename"], mute = True)
+			dbx.files_upload(upload_file.read(), "/" + files["filename"], mode = dropbox.files.WriteMode.overwrite, mute = True)
 		#Remove the downloaded file
 		os.remove("gitfile")
 
