@@ -35,11 +35,12 @@ def on_consuming(channel, method, properties, body):
     channel.cancel()
 
     #Filtering data to only publish changes made by the repository owners
-    if(credentials['github']['REPO_1'] or credentials['github']['REPO_2'] in commit_data['repo_name']):
-        if(commit_data['commiter']['login'] == credentials['github']['REPO_1'] or credentials['github']['REPO_2']
-        or credentials['github']['REPO_3']):
+    if((credentials['github']['REPO_1'] in commit_data['repo_name']) 
+    or (credentials['github']['REPO_2'] in commit_data['repo_name'])):
+        if((commit_data['commiter']['login'] == (credentials['github']['REPO_1']) or 
+        (commit_data['commiter']['login'] == credentials['github']['REPO_2']) or
+        (commit_data['commiter']['login'] == credentials['github']['REPO_3']))):
             on_twitter_publishing(commit_data['repo_name'], commit_data['commiter']['login'], commit_data['html_url'])
-
             on_dropbox_storing(commit_data)
 
 def on_twitter_publishing(repo, commiter, url_raw):
@@ -64,8 +65,6 @@ def on_dropbox_storing(datafiles):
 			dbx.files_upload(upload_file.read(), "/" + files["filename"], mute = True)
 		#Remove the downloaded file
 		os.remove("gitfile")
-
-
 
 #Rabbitmq connection
 parameters = pika.ConnectionParameters('localhost')
