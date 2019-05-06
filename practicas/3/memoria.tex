@@ -141,43 +141,42 @@ Las tecnologías usadas son las siguientes:
             \item \underline{composer.json}:
                 \lstinputlisting[]{composer.json}
         \end{enumerate}
-    \item \underline{2º Parte (Guillermo Girón García)}:\ldots\ldots\ldots\ldots\ldots
-    \item \underline{3º Parte (Teodoro Martínez Márquez)}: La parte 3 se ha fusionado
+    \item \underline{2º y 3º Parte (Teodoro Martínez Márquez)}: La parte 3 se ha fusionado
     con la parte 2. Ya que en la parte 2 ya se ha consumido un mensaje de rabbitmq,
     para no tener que manejar otra cola distinta se ha aprovechado ese mismo mensaje. \par
     Lo primero es el login en dropbox: la función Dropbox de la librería dropbox nos devolverá un
     objeto con el que cubrir todas las necesidades. La función requiere un parámetro,
-    un access_token que se ha debido generar desde una cuenta de Dropbox. En este caso,
-    ese token está almacenado en un objeto local json llamado 'credentials' (ya abierto
-    en la parte anterior), en concreto en el campo 'dropbox', subcampo 'ACCESS_TOKEN'. \par
-    El resto de la parte se encuentra en la función on_dropbox_storing, que se encargará de
+    un access\_token que se ha debido generar desde una cuenta de Dropbox. En este caso,
+    ese token está almacenado en un objeto local json llamado `credentials' (ya abierto
+    en la parte anterior), en concreto en el campo `dropbox', subcampo `ACCESS\_TOKEN'. \par
+    El resto de la parte se encuentra en la función on\_dropbox\_storing, que se encargará de
     la subida de los ficheros. Esta función recibe un único parámetro. El json cargado
-    en la parte anterior con nombre 'commit_data' es el objeto que contiene toda la información
-    del commit de github. Bien, de este objeto solo nos interesa un campo llamado 'files'
+    en la parte anterior con nombre `commit\_data' es el objeto que contiene toda la información
+    del commit de github. Bien, de este objeto solo nos interesa un campo llamado `files'
     que contiene todo lo relevante a los ficheros, y ése es el parámetro que le pasamos por
     llamada. \par
     En la función, lo primero que hacemos es comprobar que la autentificación sea correcta:
-    mediante la función users_get_current_account(). Si esta función devuelve un error,
-    lo capturamos y notificamos por medio del try - exception. Si no, podemos proseguir. \par
-    Lo siguiente es "recorrer" el parámetro 'datafiles' que hemos recibido por entrada.
-    Si el commit de github modificó u añadió más de un fichero, el campo 'files' del objeto
+    mediante la función users\_get\_current\_account (). Si esta función devuelve un error,
+    lo capturamos y notificamos por medio del try \- exception. Si no, podemos proseguir. \par
+    Lo siguiente es `recorrer' el parámetro `datafiles' que hemos recibido por entrada.
+    Si el commit de github modificó u añadió más de un fichero, el campo `files' del objeto
     json se comporta como un array de objetos, cada uno correspondiente a cada fichero
-    indicado por el commit. 'for files in datafiles' se encarga de recorrer todo el array. \par
+    indicado por el commit. `for files in datafiles' se encarga de recorrer todo el array. \par
     Ahora, en cada iteración debemos subir a dropbox cada uno de los ficheros del commit.
-    Para esto, primero tenemos que conseguir los ficheros. El campo 'files' del json tiene
-    un subcampo llamado "raw_url", que tiene la url del fichero en la página de github.
+    Para esto, primero tenemos que conseguir los ficheros. El campo `files' del json tiene
+    un subcampo llamado `raw\_url', que tiene la url del fichero en la página de github.
     Esta url se la pasamos a la función request.urlretrieve de la librería urllib, y
     nos descargará el archivo en nuestro directorio local. También le indicamos que le
-    de el nombre "gitfile".\par
+    de el nombre `gitfile'.\par
     Una vez descargado, abrimos el fichero gitfile en modo lectura binaria, indicado por
-    el modo "rb": with open('gitfile', "rb") as upload_file: . Al abrirlo en modo lectura
-    binaria, la función read() del fichero nos devolverá un fichero binario, que a su vez
-    lo pasamos como parámetro a la función files_upload() del objeto dropbox. Esta función
+    el modo `rb': with open (`gitfile', `rb') as upload\_file:. Al abrirlo en modo lectura
+    binaria, la función read () del fichero nos devolverá un fichero binario, que a su vez
+    lo pasamos como parámetro a la función files\_upload () del objeto dropbox. Esta función
     subirá el archivo a dropbox, pero también necesita otros parámetros: la ruta y nombre
-    del fichero (obtenidos del subcampo 'filename' del json), el modo de escritura en
+    del fichero (obtenidos del subcampo `filename' del json), el modo de escritura en
     sobreescritura para poder modificar archivos existentes, y la variable llave mute
     con valor true. Una vez se ha subido el archivo, cerramos la lectura del fichero local
-    y lo eliminamos con la función remove de la librería OS. Todo esto se repetirá para
+    y lo eliminamos con la función remove de la librería `OS'. Todo esto se repetirá para
     todos y cada uno de los ficheros que indique el commit.
 \end{enumerate}
 
