@@ -1,12 +1,9 @@
 import pika
 import json
 import twitter
-from furl import furl
 import dropbox
 import urllib
 import os
-import pydrive
-
 #Global data needed
 with open('credentials.json', 'r') as read_file:
     credentials = json.load(read_file)
@@ -23,7 +20,7 @@ dbx = dropbox.Dropbox(credentials['dropbox']["ACCESS_TOKEN"])
 commit_data = {}
 json_data = {}
 
-#Here I receive the message from rabbit    
+#Here I receive the message from rabbit
 def on_consuming(channel, method, properties, body):
 
     #Storage data and dump it from json
@@ -36,37 +33,36 @@ def on_consuming(channel, method, properties, body):
     channel.cancel()
 
     #Filtering data to only publish changes made by the repository owners
-    if(credentials['github']['REPO_1'] or credentials['github']['REPO_2'] in commit_data['repo_name']):
-        if(commit_data['commiter']['login'] == credentials['github']['REPO_1'] or credentials['github']['REPO_2']
-        or credentials['github']['REPO_3']):
+    if((credentials['github']['REPO_1'] in commit_data['repo_name'])
+    or (credentials['github']['REPO_2'] in commit_data['repo_name'])):
+        if((commit_data['commiter']['login'] == (credentials['github']['REPO_1']) or
+        (commit_data['commiter']['login'] == credentials['github']['REPO_2']) or
+        (commit_data['commiter']['login'] == credentials['github']['REPO_3']))):
             on_twitter_publishing(commit_data['repo_name'], commit_data['commiter']['login'], commit_data['html_url'])
-
-            on_dropbox_storing(commit_data)
+            on_dropbox_storing(commit_data['files'])
 
 def on_twitter_publishing(repo, commiter, url_raw):
     #Tweeting
-    status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo + 
+    status = apiTwitter.PostUpdate(status='New Commit from: ' + commiter +  ' on: ' + repo +
     ' follow link to discover the changes.\n' + url_raw)
 
-def on_dropbox_storing(datafiles): 
+def on_dropbox_storing(datafiles):
 	#Check that dropbox login has been successful
-    	try:
+	try:
 		dbx.users_get_current_account()
 	except dropbox.exceptions.AuthError as err:
 		print("ERROR: Could not login to Dropbox.")
-	
+
 	#Get every file that the json objects indicates
 	for files in datafiles:
 		#Download the file from url in local directory
-		urllib.urlretrieve(files["raw_url"], "gitfile")
+		urllib.request.urlretrieve(files["raw_url"], "gitfile")
 
 		#Open the downloaded file and upload it to dropbox
 		with open('gitfile', "rb") as upload_file:
-			dbx.files_upload(upload_file.read(), "/" + files["filename"], mute = True)
+			dbx.files_upload(upload_file.read(), "/" + files["filename"], mode = dropbox.files.WriteMode.overwrite, mute = True)
 		#Remove the downloaded file
 		os.remove("gitfile")
-
-	
 
 #Rabbitmq connection
 parameters = pika.ConnectionParameters('localhost')
@@ -77,7 +73,7 @@ channel.basic_consume(queue='github', on_message_callback=on_consuming)
 #Spooling
 try:
     channel.start_consuming()
-    connection.sleep(5.0)   
+    connection.sleep(5.0)
 except KeyboardInterrupt:
     channel.stop_consuming()
     connection.close()
