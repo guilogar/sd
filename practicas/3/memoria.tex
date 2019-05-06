@@ -50,10 +50,10 @@ A continuación, las enumeramos.
         rabbitmq.
     \item \underline{2º Parte (Guillermo Girón García)}: Consiste en obtener la información
         contenida en una cola de rabbitmq mediante spooling, separarla en los campos
-        necesarios, después de un `loggin' en Twitter, publicar un pequeño mensaje en 
+        necesarios, después de un `loggin' en Twitter, publicar un pequeño mensaje en
         la red social que indique que se ha realizado un commit en la cuenta de GitHub del
         usuario, y permita enlazar al mismo, para observar todos los cambios y el mensaje del
-        commit. 
+        commit.
     \item \underline{3º Parte (Teodoro Martínez Márquez)}: A partir del fichero json conseguido
 	en la parte 2, identificar qué archivos fueron modificados/añadidos en el commit,
 	descargarlos de github y subir una copia de seguridad a una cuenta de dropbox.
@@ -72,18 +72,18 @@ Las tecnologías usadas son las siguientes:
     \item \underline{2º Parte (Guillermo Girón García)}: Se ha utilizado Python 3 como
     lenguaje de programación para la implementación, con las siguientes bibliotecas:
     \begin{enumerate}
-        \item Pika, para trabajar de forma sencilla con las colas de rabbitmq. 
-        \item Python-Twitter, para acceder de manera sencilla a la api de Twitter. 
+        \item Pika, para trabajar de forma sencilla con las colas de rabbitmq.
+        \item Python-Twitter, para acceder de manera sencilla a la api de Twitter.
         \item La carga de los credenciales de las cuentas de twitter y dropbox se realizan desde un fichero Json.
-    \end{enumerate} 
-    \item \underline{3º Parte (Teodoro Martínez Márquez)}: También se ha utilizado Python 3
-	para la implementación de esta parte, pero haciendo uso de más bibliotecas:
-    \begin{enumerate}
-	\item Dropbox, para poder inicias sesión en dropbox y subir un fichero desde python.
-	\item Urllib, para poder descargar los ficheros de github.
-	\item OS, para controlar ciertos errores.
     \end{enumerate}
-	
+    \item \underline{3º Parte (Teodoro Martínez Márquez)}: También se ha utilizado Python 3
+    para la implementación de esta parte, pero haciendo uso de más bibliotecas:
+    \begin{enumerate}
+	     \item Dropbox, para poder inicias sesión en dropbox y subir un fichero desde python.
+       \item Urllib, para poder descargar los ficheros de github.
+       \item OS, para manejo de ficheros locales.
+    \end{enumerate}
+
 \end{enumerate}
 
 \textbf{4º Parte. Código usado para realizar el programa.}
@@ -142,7 +142,43 @@ Las tecnologías usadas son las siguientes:
                 \lstinputlisting[]{composer.json}
         \end{enumerate}
     \item \underline{2º Parte (Guillermo Girón García)}:\ldots\ldots\ldots\ldots\ldots
-    \item \underline{3º Parte (Teodoro Martínez \ldots)}:\ldots\ldots\ldots\ldots\ldots
+    \item \underline{3º Parte (Teodoro Martínez Márquez)}: La parte 3 se ha fusionado
+    con la parte 2. Ya que en la parte 2 ya se ha consumido un mensaje de rabbitmq,
+    para no tener que manejar otra cola distinta se ha aprovechado ese mismo mensaje. \par
+    Lo primero es el login en dropbox: la función Dropbox de la librería dropbox nos devolverá un
+    objeto con el que cubrir todas las necesidades. La función requiere un parámetro,
+    un access_token que se ha debido generar desde una cuenta de Dropbox. En este caso,
+    ese token está almacenado en un objeto local json llamado 'credentials' (ya abierto
+    en la parte anterior), en concreto en el campo 'dropbox', subcampo 'ACCESS_TOKEN'. \par
+    El resto de la parte se encuentra en la función on_dropbox_storing, que se encargará de
+    la subida de los ficheros. Esta función recibe un único parámetro. El json cargado
+    en la parte anterior con nombre 'commit_data' es el objeto que contiene toda la información
+    del commit de github. Bien, de este objeto solo nos interesa un campo llamado 'files'
+    que contiene todo lo relevante a los ficheros, y ése es el parámetro que le pasamos por
+    llamada. \par
+    En la función, lo primero que hacemos es comprobar que la autentificación sea correcta:
+    mediante la función users_get_current_account(). Si esta función devuelve un error,
+    lo capturamos y notificamos por medio del try - exception. Si no, podemos proseguir. \par
+    Lo siguiente es "recorrer" el parámetro 'datafiles' que hemos recibido por entrada.
+    Si el commit de github modificó u añadió más de un fichero, el campo 'files' del objeto
+    json se comporta como un array de objetos, cada uno correspondiente a cada fichero
+    indicado por el commit. 'for files in datafiles' se encarga de recorrer todo el array. \par
+    Ahora, en cada iteración debemos subir a dropbox cada uno de los ficheros del commit.
+    Para esto, primero tenemos que conseguir los ficheros. El campo 'files' del json tiene
+    un subcampo llamado "raw_url", que tiene la url del fichero en la página de github.
+    Esta url se la pasamos a la función request.urlretrieve de la librería urllib, y
+    nos descargará el archivo en nuestro directorio local. También le indicamos que le
+    de el nombre "gitfile".\par
+    Una vez descargado, abrimos el fichero gitfile en modo lectura binaria, indicado por
+    el modo "rb": with open('gitfile', "rb") as upload_file: . Al abrirlo en modo lectura
+    binaria, la función read() del fichero nos devolverá un fichero binario, que a su vez
+    lo pasamos como parámetro a la función files_upload() del objeto dropbox. Esta función
+    subirá el archivo a dropbox, pero también necesita otros parámetros: la ruta y nombre
+    del fichero (obtenidos del subcampo 'filename' del json), el modo de escritura en
+    sobreescritura para poder modificar archivos existentes, y la variable llave mute
+    con valor true. Una vez se ha subido el archivo, cerramos la lectura del fichero local
+    y lo eliminamos con la función remove de la librería OS. Todo esto se repetirá para
+    todos y cada uno de los ficheros que indique el commit.
 \end{enumerate}
 
 \textbf{5º Parte. Configuración del entorno.}
@@ -205,7 +241,7 @@ chmod +x phpbrew
 # Move phpbrew to somewhere can be found by your $PATH
 sudo mv phpbrew /usr/local/bin/phpbrew
     \end{lstlisting}
-    
+
     \item Instalar la version de php 7.2 con la libreria pthreads añadida,
           junto con el modulo para las funciones de acceso a base de datos
           PostgreSQL\. Claro esta, esto tomará cierto tiempo, ya que, se
@@ -226,7 +262,7 @@ phpbrew init
 # Se instala con: sudo apt install postgresql-server-dev-all en debian y derivados
 phpbrew install php-7.2.12 +default -- --with-openssl --enable-maintainer-zts --with-libdir=lib64 --with-pgsql='/usr/bin'
     \end{lstlisting}
-    
+
     \item Poner el interprete de php nuevo compilado, por defecto en el sistema.
     \lstset{
       texcl=true,
@@ -243,7 +279,7 @@ sudo cp \~/.phpbrew/php/php-7.2.12/bin/* /usr/bin
     Se recomienda hacer las dos acciones, aunque con la primera es más que suficiente si no se tiene
     instalado en el sistema ninguna versión del php. Si ya se tiene una version instalada de los
     repositorios, entonces se debería realizar las dos acciones.
-    
+
     \item Comprobar si ha tenido exito la operacion con las dos siguientes acciones.
     \lstset{
       texcl=true,
