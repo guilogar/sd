@@ -4,8 +4,9 @@ import twitter
 import dropbox
 import urllib
 import os
+
 #Global data needed
-with open('credentials.json', 'r') as read_file:
+with open('/Volumes/Macintosh HD/Programacion/credentials.json', 'r') as read_file:
     credentials = json.load(read_file)
 
 #Login in twitter
